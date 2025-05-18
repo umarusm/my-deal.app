@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Deal Page</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .container { max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
+    .preview { max-width: 100%; margin-top: 10px; }
+    .deal, .message { margin-top: 20px; }
+    .deals-list { margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px; }
+    .btn { margin-top: 10px; padding: 10px 20px; border: none; background: green; color: white; border-radius: 5px; cursor: pointer; }
+    .btn:disabled { background: gray; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login with Google</h2>
+    <button onclick="signInWithGoogle()" class="btn">Login</button>
+    <p id="userEmail"></p>
+
+    <h3>Upload an Image</h3>
+    <input type="file" id="imageInput" accept="image/*"><br>
+    <img id="preview" class="preview" style="display:none;" />
+
+    <div class="deal">
+      <h3>Add a Deal</h3>
+      <input type="text" id="dealText" placeholder="Enter deal...">
+      <button onclick="addDeal()" class="btn">Add Deal</button>
+      <div class="deals-list" id="dealsList"></div>
+    </div>
+
+    <div class="message">
+      <h3>Customer Message</h3>
+      <textarea id="messageBox" rows="4" cols="50" placeholder="Write your message..."></textarea><br>
+      <button onclick="sendMessage()" class="btn">Send Message</button>
+      <p id="messageStatus"></p>
+    </div>
+  </div>
+
+  <script>
+    function signInWithGoogle() {
+      alert("Google Sign-in is demo only. (Firebase needed for real login)");
+      document.getElementById("userEmail").innerText = "Signed in as: demo@gmail.com";
+    }
+
+    document.getElementById("imageInput").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById("preview");
+          img.src = e.target.result;
+          img.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function addDeal() {
+      const dealText = document.getElementById("dealText").value;
+      if (dealText.trim() === "") return;
+
+      const dealList = document.getElementById("dealsList");
+      const newDeal = document.createElement("p");
+      newDeal.textContent = "- " + dealText;
+      dealList.appendChild(newDeal);
+
+      document.getElementById("dealText").value = "";
+    }
+
+    function sendMessage() {
+      const message = document.getElementById("messageBox").value;
+      if (message.trim() === "") return;
+
+      document.getElementById("messageStatus").innerText = "Message sent: " + message;
+      document.getElementById("messageBox").value = "";
+    }
+  </script>
+</body>
+</html>
