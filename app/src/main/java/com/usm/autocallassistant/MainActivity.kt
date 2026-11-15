@@ -1,30 +1,29 @@
 package com.usm.autocallassistant
 
+import android.app.role.RoleManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.LinearLayout
+import android.telecom.TelecomManager
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        val layout = LinearLayout(this)
-        layout.orientation = LinearLayout.VERTICAL
-        layout.setPadding(32, 48, 32, 32)
+        // ایپ کو ڈیفال트 ڈائلر بنانے کی درخواست
+        requestDefaultDialer()
+    }
 
-        val title = TextView(this)
-        title.text = "USM Auto Call Assistant"
-        title.textSize = 24f
-
-        val status = TextView(this)
-        status.text = "Auto Call Assistant is ready"
-        status.textSize = 18f
-
-        layout.addView(title)
-        layout.addView(status)
-
-        setContentView(layout)
+    private fun requestDefaultDialer() {
+        val telecomManager = getSystemService(Context.TELECOM_MANAGER) as TelecomManager
+        if (packageName != telecomManager.defaultDialerPackage) {
+            val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
+                putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+            }
+            startActivity(intent)
+        }
     }
 }
