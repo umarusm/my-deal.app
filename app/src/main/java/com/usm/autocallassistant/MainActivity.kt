@@ -93,34 +93,50 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestDefaultDialerRole() {
-        val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
-        if (roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
-            if (!roleManager.isRoleHeld(RoleManager.ROLE_DIALER)) {
-                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
-                startActivityForResult(intent, REQUEST_DIALER_ROLE)
+        try {
+            val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
+                if (!roleManager.isRoleHeld(RoleManager.ROLE_DIALER)) {
+                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
+                    startActivityForResult(intent, REQUEST_DIALER_ROLE)
+                    Toast.makeText(this, "Opening permission prompt...", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
+                    updateRoleStatus()
+                }
             } else {
-                Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
-                updateRoleStatus()
+                // اگر فون یا اینڈرائیڈ ورژن اس رول کو سپورٹ نہیں کرتا
+                Toast.makeText(this, "Debug: ROLE_DIALER is NOT available on this device!", Toast.LENGTH_LONG).show()
             }
-        } else {
-            Toast.makeText(this, "Role dialer not available on this device", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            // اگر کوئی بھی خرابی یا ایکسیپشن آئے گی تو یہ اسکرین پر شو کر دے گا
+            Toast.makeText(this, "Error/Exception: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_DIALER_ROLE) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Permission Granted Successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permission Denied by User!", Toast.LENGTH_SHORT).show()
+            }
             updateRoleStatus()
         }
     }
 
     private fun updateRoleStatus() {
-        val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
-        val isDefault = roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
-        statusText.text = if (isDefault) {
-            "✅ Default Phone App: Active"
-        } else {
-            "⚠️ Default Phone App: Not Enabled"
+        try {
+            val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+            val isDefault = roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
+            statusText.text = if (isDefault) {
+                "✅ Default Phone App: Active"
+            } else {
+                "⚠️ Default Phone App: Not Enabled"
+            }
+        } catch (e: Exception) {
+            statusText.text = "Status Error: ${e.message}"
         }
     }
 
