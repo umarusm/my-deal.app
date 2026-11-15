@@ -20,24 +20,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ڈارک اور ہائی اسٹائل بیک گراؤنڈ
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(48, 80, 48, 48)
-            setBackgroundColor(Color.parseColor("#0B0F19")) // گہرا سائبر پنک ڈارک کلر
+            setBackgroundColor(Color.parseColor("#0B0F19"))
         }
 
-        // ایپ کا ٹائٹل یا لوگو اسٹائل
         val titleText = TextView(this).apply {
             text = "⚡ USM AUTO CALL ⚡"
             textSize = 22f
-            setTextColor(Color.parseColor("#FF9800")) // بولڈ اورنج کلر
+            setTextColor(Color.parseColor("#FF9800"))
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 40)
         }
 
-        // اسٹیٹس کارڈ (گلاس اور ڈارک لک)
         statusText = TextView(this).apply {
             text = "Status: Checking permissions..."
             textSize = 15f
@@ -53,14 +50,13 @@ class MainActivity : AppCompatActivity() {
             setPadding(32, 36, 32, 36)
         }
 
-        // اسٹائلش ایکشن بٹن
         val actionButton = Button(this).apply {
-            text = "🛡️ Set as Default Phone App"
+            text = "🛡️ SET AS DEFAULT PHONE APP"
             textSize = 15f
             setTextColor(Color.WHITE)
             
             val btnBg = GradientDrawable().apply {
-                setColor(Color.parseColor("#FF6F00")) // پرکشش اورنج شیڈ
+                setColor(Color.parseColor("#FF6F00"))
                 cornerRadius = 24f
             }
             background = btnBg
@@ -71,7 +67,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // نوٹ یا ڈسکرپشن
         val noteText = TextView(this).apply {
             text = "ℹ️ Prototype: Automatically answers incoming calls after 5 seconds and routes audio to speaker."
             textSize = 13f
@@ -80,11 +75,9 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 40, 0, 0)
         }
 
-        // ویوز کو ترتیب سے جوڑنا
         rootLayout.addView(titleText)
         rootLayout.addView(statusText)
         
-        // بٹن کے اوپر مارجن دینے کے لیے
         val btnParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -101,10 +94,14 @@ class MainActivity : AppCompatActivity() {
     private fun requestDefaultDialer() {
         val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         if (packageName != telecomManager.defaultDialerPackage) {
-            val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
-                putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+            try {
+                val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
+                    putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
-            startActivity(intent)
         } else {
             Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
             updateRoleStatus()
