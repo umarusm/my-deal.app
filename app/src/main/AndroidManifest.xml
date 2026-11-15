@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ضروری کالنگ اور نوٹیفیکیشن پرمیشنز -->
+    <!-- जरूरी कॉलिंग और नोटिफिकेशन परमिशंस -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -13,7 +13,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:supportsRtl="true">
 
-        <!-- مین ایکٹیویٹی -->
+        <!-- मेन गतिविधि (डायल इंटेंट फिल्टर के साथ) -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -21,9 +21,17 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- यह फ़िल्टर जोड़ना अनिवार्य है ताकि RoleManager ऐप को डायलर मान सके -->
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tel" />
+            </intent-filter>
         </activity>
 
-        <!-- InCallService سیٹ اپ -->
+        <!-- InCallService सेटअप -->
         <service
             android:name=".UsmInCallService"
             android:permission="android.permission.BIND_INCALL_SERVICE"
