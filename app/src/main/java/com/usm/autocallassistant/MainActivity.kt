@@ -1,11 +1,11 @@
 package com.usm.autocallassistant
 
+import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.telecom.TelecomManager
 import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     private lateinit var statusText: TextView
+    private val REQUEST_DIALER_ROLE = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         statusText = TextView(this).apply {
-            text = "Status: Checking permissions..."
+            text = "Status: Checking status..."
             textSize = 15f
             setTextColor(Color.parseColor("#E0E0E0"))
             gravity = Gravity.CENTER
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(32, 28, 32, 28)
             
             setOnClickListener {
-                requestDefaultDialer()
+                requestDefaultDialerRole()
             }
         }
 
@@ -91,26 +92,31 @@ class MainActivity : AppCompatActivity() {
         updateRoleStatus()
     }
 
-    private fun requestDefaultDialer() {
-        val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        if (packageName != telecomManager.defaultDialerPackage) {
-            try {
-                val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
-                    putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
-                }
-                startActivity(intent)
-            } catch (e: Exception) {
-                Toast.makeText(this, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+    private fun requestDefaultDialerRole() {
+        val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+        if (roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
+            if (!roleManager.isRoleHeld(RoleManager.ROLE_DIALER)) {
+                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
+                startActivityForResult(intent, REQUEST_DIALER_ROLE)
+            } else {
+                Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
+                updateRoleStatus()
             }
         } else {
-            Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Role dialer not available on this device", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_DIALER_ROLE) {
             updateRoleStatus()
         }
     }
 
     private fun updateRoleStatus() {
-        val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        val isDefault = packageName == telecomManager.defaultDialerPackage
+        val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+        val isDefault = roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
         statusText.text = if (isDefault) {
             "✅ Default Phone App: Active"
         } else {
