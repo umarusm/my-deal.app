@@ -2,8 +2,11 @@ package com.usm.autocallassistant
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.telecom.TelecomManager
+import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -12,48 +15,86 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var status: TextView
+    private lateinit var statusText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // बिना XML फाइल के सीधे कोड से लेआउट तैयार करना
-        val layout = LinearLayout(this).apply {
+        // ڈارک اور ہائی اسٹائل بیک گراؤنڈ
+        val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(40, 60, 40, 40)
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(48, 80, 48, 48)
+            setBackgroundColor(Color.parseColor("#0B0F19")) // گہرا سائبر پنک ڈارک کلر
         }
 
-        val title = TextView(this).apply {
-            text = "USM Auto Call"
-            textSize = 24f
+        // ایپ کا ٹائٹل یا لوگو اسٹائل
+        val titleText = TextView(this).apply {
+            text = "⚡ USM AUTO CALL ⚡"
+            textSize = 22f
+            setTextColor(Color.parseColor("#FF9800")) // بولڈ اورنج کلر
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 40)
         }
 
-        status = TextView(this).apply {
-            text = "Auto-answer setup: not enabled"
-            textSize = 16f
-            setPadding(0, 32, 0, 32)
+        // اسٹیٹس کارڈ (گلاس اور ڈارک لک)
+        statusText = TextView(this).apply {
+            text = "Status: Checking permissions..."
+            textSize = 15f
+            setTextColor(Color.parseColor("#E0E0E0"))
+            gravity = Gravity.CENTER
+            
+            val bg = GradientDrawable().apply {
+                setColor(Color.parseColor("#161B22"))
+                cornerRadius = 24f
+                setStroke(2, Color.parseColor("#30363D"))
+            }
+            background = bg
+            setPadding(32, 36, 32, 36)
         }
 
-        val roleButton = Button(this).apply {
-            text = "Set as default phone app"
+        // اسٹائلش ایکشن بٹن
+        val actionButton = Button(this).apply {
+            text = "🛡️ Set as Default Phone App"
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            
+            val btnBg = GradientDrawable().apply {
+                setColor(Color.parseColor("#FF6F00")) // پرکشش اورنج شیڈ
+                cornerRadius = 24f
+            }
+            background = btnBg
+            setPadding(32, 28, 32, 28)
+            
             setOnClickListener {
                 requestDefaultDialer()
             }
         }
 
-        val note = TextView(this).apply {
-            text = "Prototype: answers incoming calls after 5 seconds and routes audio to speaker."
-            textSize = 14f
-            setPadding(0, 24, 0, 0)
+        // نوٹ یا ڈسکرپشن
+        val noteText = TextView(this).apply {
+            text = "ℹ️ Prototype: Automatically answers incoming calls after 5 seconds and routes audio to speaker."
+            textSize = 13f
+            setTextColor(Color.parseColor("#8B949E"))
+            gravity = Gravity.CENTER
+            setPadding(0, 40, 0, 0)
         }
 
-        // सभी कॉम्पोनेंट्स को लेआउट में जोड़ना
-        layout.addView(title)
-        layout.addView(status)
-        layout.addView(roleButton)
-        layout.addView(note)
+        // ویوز کو ترتیب سے جوڑنا
+        rootLayout.addView(titleText)
+        rootLayout.addView(statusText)
+        
+        // بٹن کے اوپر مارجن دینے کے لیے
+        val btnParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 48, 0, 0)
+        }
+        rootLayout.addView(actionButton, btnParams)
+        rootLayout.addView(noteText)
 
-        setContentView(layout)
+        setContentView(rootLayout)
         updateRoleStatus()
     }
 
@@ -65,7 +106,7 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } else {
-            Toast.makeText(this, "App is already the default dialer", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
             updateRoleStatus()
         }
     }
@@ -73,7 +114,11 @@ class MainActivity : AppCompatActivity() {
     private fun updateRoleStatus() {
         val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         val isDefault = packageName == telecomManager.defaultDialerPackage
-        status.text = if (isDefault) "Default phone app: enabled" else "Default phone app: not enabled"
+        statusText.text = if (isDefault) {
+            "✅ Default Phone App: Active"
+        } else {
+            "⚠️ Default Phone App: Not Enabled"
+        }
     }
 
     override fun onResume() {
