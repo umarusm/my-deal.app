@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var statusText: TextView
     private val REQUEST_DIALER_ROLE = 123
+    private var hasRequestedRole = false // تاکہ بار بار پاپ اپ نہ آئے
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,29 +100,18 @@ class MainActivity : AppCompatActivity() {
                 if (!roleManager.isRoleHeld(RoleManager.ROLE_DIALER)) {
                     val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
                     startActivityForResult(intent, REQUEST_DIALER_ROLE)
-                    Toast.makeText(this, "Opening permission prompt...", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "App is already the default dialer!", Toast.LENGTH_SHORT).show()
-                    updateRoleStatus()
                 }
-            } else {
-                // اگر فون یا اینڈرائیڈ ورژن اس رول کو سپورٹ نہیں کرتا
-                Toast.makeText(this, "Debug: ROLE_DIALER is NOT available on this device!", Toast.LENGTH_LONG).show()
             }
         } catch (e: Exception) {
-            // اگر کوئی بھی خرابی یا ایکسیپشن آئے گی تو یہ اسکرین پر شو کر دے گا
-            Toast.makeText(this, "Error/Exception: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_DIALER_ROLE) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "Permission Granted Successfully!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Permission Denied by User!", Toast.LENGTH_SHORT).show()
-            }
             updateRoleStatus()
         }
     }
@@ -130,10 +120,17 @@ class MainActivity : AppCompatActivity() {
         try {
             val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
             val isDefault = roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
+            
             statusText.text = if (isDefault) {
                 "✅ Default Phone App: Active"
             } else {
                 "⚠️ Default Phone App: Not Enabled"
+            }
+
+            // اگر ایپ ڈیفالٹ ڈائلر نہیں ہے، تو ایپ کھلتے ہی خود بخود پرمیشن باکس سامنے لے آئے
+            if (!isDefault && !hasRequestedRole) {
+                hasRequestedRole = true
+                requestDefaultDialerRole()
             }
         } catch (e: Exception) {
             statusText.text = "Status Error: ${e.message}"
