@@ -21,16 +21,16 @@ class UsmInCallService : InCallService() {
             // 5 سیکنڈ کے بعد کال اٹھانے کا ٹائمر
             Handler(Looper.getMainLooper()).postDelayed({
                 try {
-                    // کال کا جواب دیں (Answer)
+                    // کال کا جواب دیں
                     call.answer(android.telecom.VideoProfile.STATE_AUDIO_ONLY)
                     
-                    // آڈیو کو اسپیکر پر شفٹ کریں
-                    setAudioRoute(Call.AudioRoute.SPEAKER)
+                    // آڈیو کو اسپیکر پر شفٹ کریں (درست طریقہ)
+                    call.setAudioRoute(Call.AUDIO_ROUTE_SPEAKER)
                     Log.d(TAG, "Call answered and routed to speaker automatically.")
                 } catch (e: Exception) {
                     Log.e(TAG, "Error answering call: ${e.message}")
                 }
-            }, 5000) // 5000 ملي سیکنڈ = 5 سیکنڈ
+            }, 5000) // 5 سیکنڈ
         }
     }
 
